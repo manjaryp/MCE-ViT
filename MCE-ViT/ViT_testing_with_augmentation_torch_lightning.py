@@ -102,37 +102,14 @@ from skimage import color
 compression_quality = 90
 tp = A.ImageCompression(quality_lower=compression_quality, quality_upper=compression_quality, always_apply=True, p=1)
  
-def jpeg_diff(img):
-    #print(type(img))
-    #kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, tuple(np.random.randint(1, 6, 2)))
-    #img = cv2.dilate(img, kernel, iterations=1)
-    #img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    
-    #lab_image = skimage.color.rgb2lab(img)
-    #img = np.uint8(skimage.color.lab2lch(lab_image))
-    
+def jpeg_diff(img):   
     img = np.uint8(skimage.color.rgb2ycbcr(img))
-
     compr_img = tp(image=img)['image']
-    
-    #diff = ImageChops.difference(Image.fromarray(img).convert('RGB'), Image.fromarray(compr_img).convert('RGB')) #ImageChops.difference(Image.fromarray(np.uint8(img)).convert('RGB'),Image.fromarray(np.uint8(compr_img)).convert('RGB')) #img - compr_img
-    #add = ImageChops.add(Image.fromarray(img).convert('RGB'),  diff) #ImageChops.add(Image.fromarray(np.uint8(img)).convert('RGB'),  diff )
-   
     diff = ImageChops.difference(Image.fromarray(img.astype(np.uint8)), Image.fromarray(compr_img.astype(np.uint8))) 
     #print(type(diff))
     diff = np.asarray(diff)
     diff[:,:,0] = np.zeros((np.shape(diff[:,:,0])))
-    #print(diff[:,:,2])
-    #print(type(diff))
-    #print(np.shape(diff[:,:,0]))   
-    #diff = Image.fromarray(diff.astype(np.uint8))
-    #print(type(diff)) 
-    
     add = ImageChops.add(Image.fromarray(img.astype(np.uint8)),  Image.fromarray(diff.astype(np.uint8)))
-    
-    #add = np.asarray(add)
-    #t = add[:,:,0]
-    #print(np.array_equal(img[:,:,0],t))
     
     extrema = add.getextrema()
     max_diff_add = max([ex[1] for ex in extrema])
@@ -161,22 +138,6 @@ class DIFF(ImageOnlyTransform):
 a_transform = A.Compose(
     [
         DIFF()        
-        #A.Resize(width=512, height=512),
-        #A.RandomCrop(width=100, height=100),
-        #A.Rotate(limit=40, p=0.9, border_mode=cv2.BORDER_CONSTANT),
-        #A.HorizontalFlip(p=0.5),
-        #A.VerticalFlip(p=0.1),
-        #A.RGBShift(r_shift_limit=25, g_shift_limit=25, b_shift_limit=25, p=0.9)#,
-        #A.OneOf([
-            #A.Blur(blur_limit=3, p=0.5),
-            #A.ColorJitter(p=0.5),
-        #], p=1.0),
-        #A.Normalize(
-           # mean=[0, 0, 0],
-            #std=[1, 1, 1],
-           # max_pixel_value=255,
-        #),
-#         ToTensorV2(),
     ]
 )
 
